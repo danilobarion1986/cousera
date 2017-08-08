@@ -14,7 +14,10 @@
  *  95% confidence interval = [0.5912745987737567, 0.5947124012262428]
  * 
  ******************************************************************************/
- 
+
+import edu.princeton.cs.algs4.StdRandom;
+import edu.princeton.cs.algs4.StdStats;
+
  /*****************************************************************************
   * API:
   * public PercolationStats(int n, int trials)    // perform trials independent experiments on an n-by-n grid
@@ -24,41 +27,68 @@
   * public double confidenceHi()                  // high endpoint of 95% confidence interval
   * public static void main(String[] args)        // test client (http://coursera.cs.princeton.edu/algs4/assignments/percolation.html)
   *****************************************************************************/
-public class PercolationStats {
 
-    public PercolationStats(int n, int trials) {
-        
-    }
-    
-    /**
-     * Sample mean of percolation threshold.
-     */
-    public double mean() {
-        throw new UnsupportedOperationException();
-    }
-    
-    /**
-     * Sample standard deviation of percolation threshold.
-     */
-    public double stddev() {
-        throw new UnsupportedOperationException();
-    }
-    
-    /**
-     * low  endpoint of 95% confidence interval.
-     */
-    public double confidenceLo() {
-        throw new UnsupportedOperationException();
-    }
-    
-    /**
-     * High endpoint of 95% confidence interval.
-     */
-    public double confidenceHi() {
-        throw new UnsupportedOperationException();
-    }
-    
-    public static void main(String[] args) {
-        
-    }
+public class PercolationStats {
+  private Percolation p;
+  private int t;
+  private int gridSize;
+  private int gridSitesCount;
+  private double[] percolationThresholds;
+
+  public PercolationStats(int n, int trials) {
+    validate(n, trials);
+    p = new Percolation(n);
+    t = trials;
+    gridSize = n;
+    gridSitesCount = n*n;
+    percolationThresholds = new double[n];
+  }
+  
+  private void validate(int n, int trials) {
+    if (n <= 0 || trials <= 0) 
+      throw new IllegalArgumentException("n must be between 1 and grid size");
+  }
+
+  /**
+   * Sample mean of percolation threshold.
+   */
+  public double mean() {
+    return StdStats.mean(percolationThresholds);
+  }
+  
+  /**
+   * Sample standard deviation of percolation threshold.
+   */
+  public double stddev() {
+    return StdStats.stddev(percolationThresholds);
+  }
+  
+  /**
+   * low  endpoint of 95% confidence interval.
+   */
+  public double confidenceLo() {
+    return mean() - stddev();
+  }
+  
+  /**
+   * High endpoint of 95% confidence interval.
+   */
+  public double confidenceHi() {
+    return mean() + stddev();
+  }
+  
+  public static void main(String[] args) {
+    for (int i = 0; i < t; i++) {
+      do {
+        p.open(StdRandom.uniform(gridSize), StdRandom.uniform(gridSize));
+        p.printGrid();
+      } while (!p.percolates());
+
+      percolationThresholds[i] = p.numberOfOpenSites() / gridSitesCount;
+    }    
+
+    StdOut.printf("mean                    = %f", mean());
+    StdOut.printf("stddev                  = %f", stddev());
+    StdOut.printf("95% confidence interval = [%f, %f]", confidenceLo(), confidenceHi());
+  }
 }

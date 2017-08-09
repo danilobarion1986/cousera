@@ -13,12 +13,10 @@
  *  95% confidence interval = [0.5912745987737567, 0.5947124012262428]
  * 
  ******************************************************************************/
-package edu.princeton.cs.algs4;
 
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
 import edu.princeton.cs.algs4.StdOut;
-import edu.princeton.cs.algs4.Percolation;
 
  /*****************************************************************************
   * API:
@@ -48,7 +46,7 @@ public class PercolationStats {
                 p.printGrid();
             } while (!p.percolates());
 
-            percolationThresholds[i] = p.numberOfOpenSites() / gridSitesCount;
+            percolationThresholds[i] = p.numberOfOpenSites() / (double)gridSitesCount;
         }    
 
         StdOut.printf("mean                    = %f", mean());

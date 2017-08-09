@@ -7,7 +7,6 @@
  *  http://coursera.cs.princeton.edu/algs4/checklists/percolation.html
  * 
  ******************************************************************************/
-package edu.princeton.cs.algs4;
 
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 import edu.princeton.cs.algs4.StdOut;
@@ -33,7 +32,7 @@ public class Percolation {
      */
     public Percolation(int n) {
         grid = new int[n][n];
-        wqu = new WeightedQuickUnionUF(n);
+        wqu = new WeightedQuickUnionUF((n*n)+2);  // Será que funciona?!?
         openSitesCount = 0;
 
         for (int row = 0; row < n; row++) {
@@ -68,12 +67,21 @@ public class Percolation {
             validate(col);
             
             grid[row][col] = 1;
-            // Unir os adjacentes...
-            // Na matriz é fácil, mas como farei usando o array 1D do wqu??
+            
+            // Verificar quais adjacentes estão abertos e uní-los ao recém aberto
+            connectOpenSites(row, col);
+
             openSitesCount++;
         }
     }
     
+    private void connectOpenSites(int row, int col) {
+        // Unir os adjacentes...
+        // Na matriz é fácil, mas como farei usando o array 1D do wqu??
+        if (isOpen(row, col-1))
+            wqu.union(row, col);
+    }
+
     /**
      * Is site (row, col) open?
      */

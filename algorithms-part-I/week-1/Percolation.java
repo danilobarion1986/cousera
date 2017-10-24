@@ -7,7 +7,8 @@
  *  http://coursera.cs.princeton.edu/algs4/checklists/percolation.html
  * 
  ******************************************************************************/
-package edu.princeton.cs.algs4;
+
+https://github.com/ISchwarz23/Algorithms-Part1---Assignments/blob/master/Week%201%20-%20Percolation/src/Percolation.java
 
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 import edu.princeton.cs.algs4.StdOut;
@@ -25,16 +26,24 @@ import edu.princeton.cs.algs4.StdOut;
   *****************************************************************************/
 public class Percolation {
     private int[][] grid;
-    private WeightedQuickUnionUF wqu;
+    private int gridSize;
+    private int gridColumnsCount;
     private int openSitesCount; 
-
+    private int virtualTopSite;
+    private int virtualBottomSite;
+    private WeightedQuickUnionUF weightedQuickUnion;
+    
     /**
      * Create n-by-n grid, with all sites blocked.
      */
     public Percolation(int n) {
         grid = new int[n][n];
-        wqu = new WeightedQuickUnionUF(n);
+        gridSize = n * n;
+        gridColumnsCount = grid[0].length;
         openSitesCount = 0;
+        virtualTopSite = 0;
+        virtualBottomSite = gridSize + 1;
+        weightedQuickUnion = new WeightedQuickUnionUF(gridSize + 2);
 
         for (int row = 0; row < n; row++) {
             for (int col = 0; col < n; col++) {
@@ -43,11 +52,22 @@ public class Percolation {
         }
     }
     
-    private void validate(int n) {
-        if (n <= 0) 
-            throw new IllegalArgumentException("n must be bigger than 0!");
+    private int mapIndexFromMatrixToArray(int row, int col) {
+        return (row * gridColumnsCount) + col;
     }
-    
+
+    private void connectAdjacentSite(int currentSiteArrayIndex, int row, int col) {
+        if (isOpen(row, col)) {
+            int adjacentSiteArrayIndex = mapIndexFromMatrixToArray(row, col);
+            weightedQuickUnion.union(currentSiteArrayIndex, adjacentSiteArrayIndex);
+        }
+    }
+
+    private void validate(int row, int col) {
+        if (row <= 0 || col <= 0) 
+            throw new IllegalArgumentException("row and column must be bigger than 0!");
+    }
+
     public void printGrid() {
         int n = grid.length;
         
@@ -64,31 +84,43 @@ public class Percolation {
      */
     public void open(int row, int col) {
         if (!isOpen(row, col)) { 
-            validate(row);
-            validate(col);
+            validate(row, col);
+                        
+            // Open site
+            grid[row - 1][col - 1] = 1; 
             
-            grid[row][col] = 1;
-            // Unir os adjacentes...
-            // Na matriz é fácil, mas como farei usando o array 1D do wqu??
+            // Get correct index for Weighted Quick Union
+            int currentSiteArrayIndex = mapIndexFromMatrixToArray(row, col);
+
+            if (row == 1) {
+                weightedQuickUnion.union(virtualTopSite, currentSiteArrayIndex);
+            }
+            if (row == gridColumnsCount) {
+                weightedQuickUnion.union(virtualBottomSite, currentSiteArrayIndex);
+            }
+            
+            connectAdjacentSite(currentSiteArrayIndex, row, col - 1);     // Left
+            connectAdjacentSite(currentSiteArrayIndex, row, col + 1);     // Right
+            connectAdjacentSite(currentSiteArrayIndex, row + 1, col);     // Down
+            connectAdjacentSite(currentSiteArrayIndex, row - 1, col + 1); // Up
+
             openSitesCount++;
         }
     }
-    
+
     /**
      * Is site (row, col) open?
      */
     public boolean isOpen(int row, int col) {
-        validate(row);
-        validate(col);
-        return grid[row][col] == 1;
+        validate(row, col);
+        return grid[row - 1][col - 1] == 1;
     }
     
     /**
      * Is site (row, col) full?
      */
     public boolean isFull(int row, int col) {
-        validate(row);
-        validate(col);
+        validate(row, col);
         throw new UnsupportedOperationException();
     }
     
@@ -103,7 +135,7 @@ public class Percolation {
      * Does the system percolate?
      */
     public boolean percolates() {
-        throw new UnsupportedOperationException();
+        return weightedQuickUnion.connected(virtualTopSite, virtualBottomSite);
     }
     
     /**

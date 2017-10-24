@@ -13,12 +13,10 @@
  *  95% confidence interval = [0.5912745987737567, 0.5947124012262428]
  * 
  ******************************************************************************/
-package edu.princeton.cs.algs4;
 
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
 import edu.princeton.cs.algs4.StdOut;
-import edu.princeton.cs.algs4.Percolation;
 
  /*****************************************************************************
   * API:
@@ -31,29 +29,24 @@ import edu.princeton.cs.algs4.Percolation;
   *****************************************************************************/
 
 public class PercolationStats {
-    private Percolation p;
-    private int gridSitesCount;
     private double[] percolationThresholds;
 
     public PercolationStats(int n, int trials) {
         validate(n, trials);
 
-        p = new Percolation(n);
-        gridSitesCount = n*n;
+        Percolation p = new Percolation(n);
+        int gridSitesCount = n * n;
         percolationThresholds = new double[n];
 
         for (int i = 0; i < trials; i++) {
             do {
-                p.open(StdRandom.uniform(n), StdRandom.uniform(n));
-                p.printGrid();
+                p.open(StdRandom.uniform(n) + 1, StdRandom.uniform(n) + 1);
             } while (!p.percolates());
 
-            percolationThresholds[i] = p.numberOfOpenSites() / gridSitesCount;
+            percolationThresholds[i] = p.numberOfOpenSites() / (double) gridSitesCount;
         }    
 
-        StdOut.printf("mean                    = %f", mean());
-        StdOut.printf("stddev                  = %f", stddev());
-        StdOut.printf("95% confidence interval = [%f, %f]", confidenceLo(), confidenceHi());
+        
     }
     
     private void validate(int n, int trials) {
@@ -90,6 +83,14 @@ public class PercolationStats {
     }
     
     public static void main(String[] args) {
-      
+        int n = Integer.parseInt(args[0]);
+        int trials = Integer.parseInt(args[1]);
+
+        PercolationStats percolationStats = new PercolationStats(n, trials);
+
+        StdOut.printf("mean                    = %f", percolationStats.mean());
+        StdOut.printf("stddev                  = %f", percolationStats.stddev());
+        StdOut.printf("95% confidence interval = [%f, %f]", percolationStats.confidenceLo(), 
+            percolationStats.confidenceHi());
     }
 }
